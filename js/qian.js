@@ -5,8 +5,8 @@ const container = document.getElementById('web_bg');
 const particleClass = 'particle';
 
 // 设置滚动数字的范围和粒子数量
-const numParticles = 500; // 粒子数量
-const scrollDuration = 28; // 每个粒子滚动的时间，单位秒
+const numParticles = 400; // 粒子数量
+const scrollDuration = 100; // 每个粒子滚动的时间，单位秒
 const specialNumbers = ['0725','1023','0324','0105','2024','2023']; // 特别的数字，可以根据需要调整
 
 // 创建粒子并将其添加到容器中
@@ -40,7 +40,7 @@ styleSheet.innerHTML = `
     font-size: 10px;
     font-family: 'Arial', sans-serif;
     font-weight: bold;
-    color: yellow;
+    color: #ADD8E6;
     opacity: 1;
     animation: scrollAnimation ${scrollDuration}s linear infinite;
     animation-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -51,11 +51,11 @@ styleSheet.innerHTML = `
       opacity: 0.5;
       }
     50%{
-      transform: translate(${1.1 * window.innerWidth}px, calc(${window.innerHeight*0.2}px*sin(2*var(--random))));
+      transform: translate(${1.1 * window.innerWidth}px, calc(${window.innerHeight*0.4}px*sin(2*var(--random))));
       opacity: 1;
     }
     100% {
-      transform: translate(${2.2*window.innerWidth}px, calc(${window.innerHeight*0.2}px*sin(5*var(--random))));
+      transform: translate(${2.2*window.innerWidth}px, calc(${window.innerHeight*0.4}px*sin(5*var(--random))));
       opacity: 0;
     }
   }
@@ -74,6 +74,7 @@ particles.forEach((particle, index) => {
   const randomTop = Math.random() * 100;
   particle.style.left = `${randomLeft}%`;
   particle.style.top = `${randomTop}%`;
+  particle.style.fontSize= `${Math.random()*20}px`
   particle.style.setProperty('--random', random);
 });
 function checkPosition() {
@@ -84,11 +85,12 @@ function checkPosition() {
       // 粒子超出可视区域，则重新设置位置
       console.log("超出可视区域");
       const isSpecial = Math.random() < 0.02; 
-      const particleNumber = isSpecial ? specialNumbers[Math.floor(Math.random() * specialNumbers.length)] :"*";
+      const particleNumber = isSpecial ? specialNumbers[Math.floor(Math.random() * specialNumbers.length)] :".";
       particle.textContent = particleNumber;
       particle.style.animation = "none";
       particle.style.left = `${-1*Math.random() * 100}%`;
       particle.style.top = `${Math.random() * 100}%`; 
+      particle.style.fontSize= `${Math.random()*20}px`
       particle.style.setProperty('--random', Math.random() * 2 - 1);
       void particle.offsetWidth; // 触发重绘，重新设置位置
       particle.style.animation = `scrollAnimation ${scrollDuration}s linear infinite`;
