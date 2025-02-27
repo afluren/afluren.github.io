@@ -1,0 +1,280 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>C++11高级特性学习 | 弧光</title><meta name="author" content="afluren"><meta name="copyright" content="afluren"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0d0d0d"><meta name="description" content="参考的代码库是boot-camp  References and Move Semantics  主要讲了引用和移动操作。 引用就是数据的别名，和该数据的变量指向同一块地址。重头戏是这里的移动（Move） LValue、RValue 在说移动之前先解释一下左值引用（Lvalue） 和右值引用（Rvalue）。左值引用是一个变量，可以有具体的指针，是一个变量，可以被具体存储。右值引用是暂时变量的引">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C++11高级特性学习">
+<meta property="og:url" content="https://afluren.github.io/2025/02/27/C++11%E9%AB%98%E7%BA%A7%E7%89%B9%E6%80%A7%E5%AD%A6%E4%B9%A0/">
+<meta property="og:site_name" content="弧光">
+<meta property="og:description" content="参考的代码库是boot-camp  References and Move Semantics  主要讲了引用和移动操作。 引用就是数据的别名，和该数据的变量指向同一块地址。重头戏是这里的移动（Move） LValue、RValue 在说移动之前先解释一下左值引用（Lvalue） 和右值引用（Rvalue）。左值引用是一个变量，可以有具体的指针，是一个变量，可以被具体存储。右值引用是暂时变量的引">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://afluren.github.io/img/avatar.jpg">
+<meta property="article:published_time" content="2025-02-27T15:40:18.000Z">
+<meta property="article:modified_time" content="2025-02-27T15:45:44.998Z">
+<meta property="article:author" content="afluren">
+<meta property="article:tag" content="C++">
+<meta property="article:tag" content="C++11">
+<meta property="article:tag" content="学习笔记">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://afluren.github.io/img/avatar.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "C++11高级特性学习",
+  "url": "https://afluren.github.io/2025/02/27/C++11%E9%AB%98%E7%BA%A7%E7%89%B9%E6%80%A7%E5%AD%A6%E4%B9%A0/",
+  "image": "https://afluren.github.io/img/avatar.jpg",
+  "datePublished": "2025-02-27T15:40:18.000Z",
+  "dateModified": "2025-02-27T15:45:44.998Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "afluren",
+      "url": "https://afluren.github.io/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://afluren.github.io/2025/02/27/C++11%E9%AB%98%E7%BA%A7%E7%89%B9%E6%80%A7%E5%AD%A6%E4%B9%A0/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'C++11高级特性学习',
+  isHighlightShrink: true,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="web_bg" style="background: none;"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">4</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">8</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(https://cdn.jsdelivr.net/gh/afluren/myPictureBed/Makise.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="https://cdn.jsdelivr.net/gh/afluren/myPictureBed/Makise.png" alt="Logo"><span class="site-name">弧光</span></a><a class="nav-page-title" href="/"><span class="site-name">C++11高级特性学习</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">C++11高级特性学习</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-02-27T15:40:18.000Z" title="发表于 2025-02-27 23:40:18">2025-02-27</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-02-27T15:45:44.998Z" title="更新于 2025-02-27 23:45:44">2025-02-27</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/C/">C++</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">5k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>17分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p>参考的代码库是<a target="_blank" rel="noopener" href="https://github.com/cmu-db/15445-bootcamp">boot-camp</a></p>
+</blockquote>
+<h1>References and Move Semantics</h1>
+<hr>
+<p>主要讲了引用和移动操作。<br>
+<strong>引用</strong>就是数据的别名，和该数据的变量指向同一块地址。重头戏是这里的<strong>移动（Move）</strong></p>
+<h4 id="LValue、RValue">LValue、RValue</h4>
+<p>在说移动之前先解释一下<strong>左值引用（Lvalue）</strong> 和<strong>右值引用（Rvalue）</strong>。左值引用是一个变量，可以有具体的指针，是一个变量，可以被具体存储。右值引用是暂时变量的引用，它代表的是数据本身。<br>
+它俩的区别在于，如果一个左值对另一个左值赋值，一般的效果是浅拷贝。但是一个左值对另一个右值赋值，就相当于把这个右值的数据的所有权给了这个右值。<br>
+从结果上看，浅拷贝就是一般的浅拷贝，而给所有权是如果这个右值原来有左值，那么原先的左值就不再指向这个右值数据（因为它的所有权给了新的左值）</p>
+<h4 id="Move">Move</h4>
+<p>上述我们提到了所有权的转移，这就是移动语义。也就是说，我们不再是复制，而是把数据的所有权<strong>移动</strong>到了新的左值。然后有一个<code>move</code>方法，需要在<code>&lt;utility&gt;</code>库里引入，作用是将左值强制转变成右值引用。</p>
+<p>没有了，大概？</p>
+<p>我们可以说明一下这里文件里给的示例。对于赋值除了一般的浅拷贝的复制赋值，还有一种的移动赋值。上述的给左值赋右值，调用的是移动赋值。<br>
+深入下去就是<code>Class &amp;operator =(Class &amp;&amp; myclass)</code>，对于一个自定义类，会有默认的赋值操作（复制、移动），而如何重载就是参数类型的区别，一个是传入左值，复制赋值；另一个是传入右值引用，移动赋值。<br>
+然后对于传入右值类型的function。虽然传入右值，但是在函数里这个右值会被当成左值使用（但是编译器知道它是作为右值传入），想要在函数里将这个右值赋给左值还需要用move来切换。<br>
+这里传入右值引用是为了告诉编译器我这个资源是右值引用，它很可能会在函数里被移动。如果你传入的是左值，那就几乎可以确认这个左值不会被影响。而传入右值就意味着是想移动它。</p>
+<h1>C++ Templates</h1>
+<hr>
+<p>主要讲的是模板。模板这个东西其实是函数和类通用的，两者用法差不多，这里就直接讲概念就好<br>
+讲了三种模板的使用：</p>
+<ul>
+<li>一般的模板使用，比如单个模板：</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">print</span><span class="params">(T a)</span></span>&#123;</span><br><span class="line">	cout&lt;&lt;a&lt;&lt;endl;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="built_in">print</span>&lt;<span class="type">int</span>&gt;(<span class="number">10</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>也可以是多个模板：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T,<span class="keyword">typename</span> U&gt;</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">print2</span><span class="params">(T a,U b)</span></span>&#123;</span><br><span class="line">	cout&lt;&lt;a&lt;&lt;<span class="string">&quot; &quot;</span>&lt;&lt;b&lt;&lt;endl;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="built_in">print</span>&lt;<span class="type">int</span>,<span class="type">double</span>&gt;(<span class="number">10</span>,<span class="number">2.5</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>空模板，也叫偏特化，可以对使用了模板的类或者函数，加上一个对某个特殊类型的模板的特化版本，就相当于是以模板类型为区分的一种重载：</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">print</span><span class="params">(T a)</span></span>&#123;</span><br><span class="line">	cout&lt;&lt;a&lt;&lt;endl;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">template</span>&lt;&gt;</span><br><span class="line"><span class="type">void</span> <span class="built_in">print</span>&lt;<span class="type">float</span>&gt;(<span class="type">float</span> a)&#123;</span><br><span class="line">	cout&lt;&lt;<span class="string">&quot;this is float version：&quot;</span>&lt;&lt;a&lt;&lt;endl;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="built_in">print</span>&lt;<span class="type">int</span>&gt;(<span class="number">10</span>);</span><br><span class="line">	<span class="built_in">print</span>&lt;<span class="type">float</span>&gt;(<span class="number">3.34f</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>还有就是将模板作为参数，可以传入常值模板，用于构建函数本身：</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="type">bool</span> T&gt;</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">print</span><span class="params">(<span class="type">int</span> a)</span></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (T)cout&lt;&lt;<span class="string">&quot;this is true：&quot;</span>&lt;&lt;a&lt;&lt;endl;</span><br><span class="line">	<span class="keyword">else</span> cout&lt;&lt;<span class="string">&quot;this is false：&quot;</span>&lt;&lt;a&lt;&lt;endl;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="built_in">print</span>&lt;<span class="literal">true</span>&gt;(<span class="number">10</span>);</span><br><span class="line">	<span class="built_in">print</span>&lt;<span class="literal">false</span>&gt;(<span class="number">10</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里的要点是，在你生成函数实例时，模板参数会参与构建函数基本框架，然后再将参数补到函数中，换句话说，模板参数会在编译时就被使用。<br>
+这里还有一个很有趣的实现，就是比如：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T,<span class="type">int</span> Size&gt;<span class="function"><span class="type">void</span> <span class="title">print</span><span class="params">(T (&amp;arr)[Size])</span></span>&#123;</span><br><span class="line">	cout&lt;&lt;Size&lt;&lt;endl;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">template</span>&lt;<span class="type">int</span> Size&gt;<span class="function"><span class="type">void</span> <span class="title">print</span><span class="params">(<span class="type">int</span> (&amp;arr)[Size])</span></span>&#123;</span><br><span class="line">	cout&lt;&lt;<span class="string">&quot;this is int:&quot;</span>&lt;&lt;Size&lt;&lt;endl;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="type">int</span> arr[<span class="number">5</span>]=&#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">5</span>,<span class="number">6</span>&#125;;</span><br><span class="line">	<span class="built_in">print</span>(arr);</span><br><span class="line">	<span class="built_in">print</span>&lt;<span class="type">int</span>&gt;(arr);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个示例有几个要点：</p>
+<ul>
+<li>注意这个<code>Size</code>，它是<strong>非类型模板参数</strong>，在这个示例里它可以自动获取数组的长度（因为你在传递参数时如此使用了它），那么它就可以作为参数使用，并且存储了数组的长度，非常方便</li>
+<li>注意这两个函数的写法，本意是想作为<strong>偏特化</strong>的实例，但实际上，你如果将第二个函数写成<code>template&lt;int Size&gt;void print&lt;int&gt;(int (&amp;arr)[Size])</code>的话，会报错。原因在于，这里的模板参数非空，所以没办法显式指定特化的模板参数。只有空置模板参数，编译器才会通过显式指定参数来做偏特化。这个也是下面我要说明的情况的原因</li>
+<li>注意主函数里这两个函数的使用。理论上都应该走特化版本的输出，对吧？但实际上，第一个确实是调用了“特化”版本，但第二个却调用了第一个版本。原因就在于第二个版本并不是第一个版本的特化，它相当于一个函数重载，指定了输入函数是int数组。所以你不指定版本，编译器会使用第二种这样直接规定的函数。但是如果你指定了模板参数的种类，编译器就会去找相应的模板函数，只能找到第一个版本</li>
+<li>所以，对于这种对部分模板参数做特化的操作，要想统一起来的话最好使用<code>std::enable_if</code>来限定模板范围，具体使用有点长，这里就不说了</li>
+</ul>
+<h1>Misc</h1>
+<hr>
+<p>讲了wrapper_class（包装类）、iterator（迭代器）和namespace（命名空间）<br>
+wrapper_class没什么特别好说的，实际上是通过move实现了这样一个类，它只支持移动赋值和移动拷贝函数。一般的根据值的构造函数可以使用（相当于是存储数据），但是复制赋值和拷贝函数都无法使用。相当于是避免了同一份数据被两个实例存储，不仅快捷遍历，也不会出现<strong>double deletion</strong>的问题</p>
+<p>至于iterator，其实看了它的实现demo，就能更好的理解它的使用。迭代器本质上是指针实现，支持自增运算，它的自增逻辑上就是把它所对应的指针向下一位自增。我们需要强调一点，迭代器本身是一种<strong>数据类型</strong>，它的内部可能是基于指针来设计，但是它本身并不是指针，只是它提供的API让它具有类似的能力。<br>
+然后迭代器也支持解码运算，可以获取迭代器所指位置的值，因为迭代器需要基于一个数据列，然后它指向的是在这个数据列中的数据位置，所以它类似一种列表中的指针。因此它也支持解码获取数据。<br>
+同时它还支持相等和不等运算，这个倒也正常</p>
+<p>至于namespace，含义很简单，其实就是给函数或者类一个空间，或者一个分类。我们正常所使用的函数一般都是定义在<code>std</code>空间，就像我们经常使用的<code>using namespace std</code>，就是默认整个文件里的函数的命名空间是<code>std</code>。想要调用某个函数是需要指定命名空间的，就算你引入了某个头文件，你没有写<code>using namespace std</code>或者加上<code>std::</code>的作用域指定，编译器也不知道你用的是那个函数，所以系统会报错。<br>
+它的作用就是创建一个自己的空间，主要解决的是函数重名问题。不同的命名空间可以有完全一样的函数，编译器会优先根据你调用时的命名空间来寻找这个函数或者数据类型</p>
+<h1>C++ Standard Library (STL) Containers</h1>
+<hr>
+<p>这次顾名思义，学习了一些容器，具体来说是<code>vetcor</code>、<code>sets</code>、<code>unordered_map</code>。然后又学习了一个方便的类型定义关键字<code>auto</code><br>
+<code>vector</code>就是老朋友了，因为前面学了迭代器所以这里也就没有什么特别难的知识点。有一个要说的就是它的插入操作：<code>push_back()</code>和<code>emplace_back()</code>。这两个效果上都是在向量后面加上一个对象，但是机制和传递的参数不一样。为明显区分我们伪定义一个数据类型<code>Point</code>，构造函数是<code>Point(int,int)</code>。那么对于一个<code>vector&lt;Point&gt;VP</code>，<code>push_back()</code>的机制是将你传递的对象或临时对象拷贝或者移动到向量尾端，所以应该写成类似<code>VP.push_back(Point(1,1))</code>；但<code>emplace_back()</code>的机制是调用向量内类型的构造函数，你需要传递的是构造函数需要的参数，然后这个方法会在向量尾创建一个相应的对象，所以你要写成<code>VP.emplace_back(1,1)</code>。因为后者是直接创建，而前者则是先创建后放置，所以<code>emplace_back</code>会稍微快一点<br>
+<code>sets</code>名字叫集合，但实际上是<strong>有序集</strong>。它的构造比较简单，插入的语法也就是<code>insert()</code>函数，直接把value传进去就行。同样的，你需要给集合的存储的数据类型。它的<code>insert</code>看起来叫插入，实际上不仅插入，而且排序，而且去重。也就是你可以乱序插入，结果上都是有序集。同样，它也有上面向量那样类似的插入方法<code>emplace</code>。<code>sets</code>不支持下标索引，其他和向量差不多。<br>
+<code>unordered_map</code>，用Python来理解就是<strong>字典</strong>，需要指定键值对的类型，比如<code>unordered_map&lt;string,int&gt;UM</code>，前者是键的类型，后者是值的类型。插入也是<code>insert</code>，插入的对象是一个键值对。你可以直接插入一个<strong>二元对(Pair)</strong> ，比如<code>UM.insert(&#123;&quot;makise&quot;,1&#125;)</code>，也可以插入一个<code>Pair</code>类型。你需要引入<code>utility.h</code>头文件来获取这个数据类型。它的效果相当于一个键值对，你可以创建一个<code>Pair</code>对象通过<code>pair&lt;string,int&gt;p(&quot;makise&quot;,1)</code>或者<code>pair&lt;string,int&gt;p=&#123;&quot;makise&quot;,1&#125;</code>或者使用<code>make_pair</code>来创建：<code>pair&lt;string,int&gt; p=make_pair(&quot;makise&quot;,1)</code></p>
+<ul>
+<li>觉得麻烦否？我们也可以使用今天学到的<code>auto</code>来减少代码量：<code>auto p=make_pair(&quot;makise&quot;,1)</code><br>
+然后把这个<code>pair</code>类型作为参数传进map里。</li>
+</ul>
+<p>重点讲一下<code>remove_if</code>和lambda表达式。<br>
+<code>remove_if</code>接受三个参数：容器的初始位置迭代器、结束位置迭代器、以及一个谓词。这个谓词具体来说是一个function，用于判断是否删除的条件，并且必须返回<code>bool</code>类型。它的实际机制是，找到不满足删除条件的元素，按顺序复制到容器前（依次往后复制，每次复制接在上一次复制的位置的后面），然后遍历完整个容器后，返回目前复制到的位置的后一个位置的迭代器。也就是说，简化一下，我想对<code>&#123;1,2,3,4,5,6&#125;</code>做remove_if，删除偶数，那么因为有<code>1,3,5</code>不满足，所以依次向前复制，最后这个数组会变成<code>&#123;1,3,5,4,5,6&#125;</code>，并且返回现在<code>4</code>在的位置的迭代器。然后真要删除就从给出的迭代器位置一直删到<code>end()</code>就行。<br>
+至于lambda表达式，它的形式是<code>[capture list](parameter list)-&gt;return type&#123;function body&#125;</code>，举个例子就是<code>[x,y](int var1,char var2)-&gt;int&#123;...&#125;</code></p>
+<ul>
+<li><strong>capture list</strong>：捕获列表，就是如果函数体中需要使用一些外部变量，需要将要用到的外部变量写在这个捕获列表里，表示从外部捕获到的变量</li>
+<li><strong>parameter list</strong>：参数列表，因为lambda表达式本质上还是一个匿名函数，就像Javascript里的箭头函数一样，所以也需要有传入的参数定义</li>
+<li><strong>return type</strong>：返回类型，这个也和一般的函数一样，但是似乎是可选，不一定要指定。但如果是返回值类型受外部接口固定的话建议还是指定一下。</li>
+<li><strong>function body</strong>：函数体，就是定义逻辑的地方，可以是多行。<br>
+一般来讲lambda表达式可以用来定义匿名函数，或者作为函数进行传递，比如<code>remove_if</code>里的谓词，就可以传递一个lambda表达式进去</li>
+</ul>
+<h1>C++ Standard Library (STL) Memory</h1>
+<hr>
+<p>这里主要是讲智能指针，两种智能指针<code>unique_ptr</code>和<code>shared_ptr</code>。<br>
+这两个指针要放在一起讲，首先，两者都有自动管理内存的机制。但是，<code>unique_str</code>是独占所有权。换句话说，它不存在复制赋值和复制构造（也不能这么操作，否则编译器会报错）但是它支持移动赋值，相当于一个<code>wrapper_class</code>，所以它的内存被删除只有在它的生命周期结束时；而<code>shared_ptr</code>则是允许数据所有权的共享。所以它可以正常复制赋值。它内置一个引用计数器，可以使用<code>use_count</code>来获取引用次数，它只有在所有引用了这个数据的指针的生命周期都结束之后，才会清理内存。<br>
+关于<code>unique_str</code>，由于它只能移动赋值，所以要传递这个类型的参数时只能传递引用。似乎也没有很特别的内容了</p>
+<h1>C++ Standard Library (STL) Synch Primitives</h1>
+<p>应该是收官了，最后一个模块。<br>
+如题，讲的是同步相关的。其实更准确的，是异步操作里的同步。<br>
+讲所有的东西之前需要先讲一下<code>thread</code>。这是C++的一个库，用于创建线程、做并行处理用的。<code>thread t(function)</code>即可创建一个线程。这里的<code>function</code>可以直接用函数名（如果函数没有额外参数），也可以<code>thread t(function,x,y)</code>直接传递参数、使用<code>bind</code>函数：<code>thread t(bind(function,x,y))</code>、或者传递一个Lambda表达式。如果参数需要一个引用类型，可以用<code>ref</code>将数据作为引用传递。<br>
+一个线程一旦被创建就会开始执行。你可以连着创建一堆线程，然后这些线程都会开始执行（这就是并行）你可以使用<code>t.join()</code>或者<code>t.detach()</code>来决定对这些子线程的结果处理。如果使用<code>join()</code>，那么主线程会在该子线程执行完毕之前阻塞在这里。如果使用<code>detach()</code>，那么该子进程就会脱离主进程，不会被阻塞，但很有可能会因为主进程结束然后被直接杀掉，进而造成可能的bug。<br>
+知道多线程之后，我们想到，如果两个线程同时对一个变量做修改，是不是会出问题？谁知道谁先谁后？所以，对于这种共享资源，我们使用<code>mutex</code>来锁住这个资源。举个例子：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;thread&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;mutex&gt;</span></span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> count=<span class="number">0</span>;</span><br><span class="line">std::mutex m;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">addCount</span><span class="params">()</span></span>&#123;</span><br><span class="line">	m.<span class="built_in">lock</span>();</span><br><span class="line">	count++;</span><br><span class="line">	m.<span class="built_in">unlock</span>();</span><br><span class="line">	<span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="function">std::thread <span class="title">t1</span><span class="params">(addCount)</span></span>;</span><br><span class="line">	<span class="function">std::thread <span class="title">t2</span><span class="params">(addCount)</span></span>;</span><br><span class="line"></span><br><span class="line">	t<span class="number">1.</span><span class="built_in">join</span>();</span><br><span class="line">	t<span class="number">2.</span><span class="built_in">join</span>();</span><br><span class="line">	std::cout&lt;&lt;count;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在上面的例子中，<code>mutex</code>包裹住的代码段里，<code>mutex</code>锁住了内部共享资源<code>count</code>的访问权。只有拿到了这个锁的权限的线程可以访问这个资源，其他线程只能等待这个线程解锁，然后另一个线程拿到锁的权限，然后执行相关代码，以此类推。<br>
+当然，假设当<code>mutex</code>包裹的区域在执行时出现了问题，没能正确到解锁的代码，就会出现该资源一直被锁住的情况，也就是<strong>死锁</strong>。所以，我们一般使用<code>lock_guard</code>、<code>scoped_lock</code>、<code>unique_lock</code>、<code>shared_lock</code>等来进行加锁。这些方法的共同点是，都支持自动解锁。当上锁器结束作用范围时，便会自动解锁。但它们的用法和含义都有一些区别：</p>
+<ul>
+<li><code>lock_gurad</code>，<code>lock_guard&lt;mutex&gt; lock(m)</code>，作用就是单纯的上锁，而且是对单的上锁</li>
+<li><code>scoped_lock</code>，<code>scoped_lock&lt;mutex&gt; lock(m1,m2)</code>，作用也是单纯的上锁，但是它支持对群。而且它还可以自动调整不同线程获得锁的顺序，使得所有的进程都会优先等待获取一个锁，然后再获取另一个锁，避免两个进程获取了不同的锁导致<strong>死锁</strong></li>
+<li><code>unique_lock</code>，<code>unique_lock&lt;mutex&gt; lock(m)</code>，也是对单的单纯上锁，但是它支持自定义位置解锁和重复上锁。比如前面讲的上锁方式都是从上锁位置一直锁到作用域。但是<code>unique_lock</code>出来的<code>lock</code>可以手动<code>lock()</code>和<code>unlock()</code>，没锁上也能自动解锁，非常方便</li>
+<li><code>shared_lock</code>，<code>shared_lock&lt;shared_mutex&gt; lock(m)</code>，是对写入操作的单纯上锁，但是允许其他线程读取这个共享资源的值。注意，这个方法只对<code>shared_mutex</code>类有效，因为一般的<code>mutex</code>默认锁住读写，无论是读写都需要和<code>mutex</code>锁申请，但是<code>shared_mutex</code>类就可以在获取读的权限时不需要再申请<br>
+除此之外还有<code>lock</code>方法，语法是<code>lock(m1,m2)</code>，可以同时加锁多个锁，相当于<code>scoped_lock</code>一半的功能，还有一半可以加上<code>lock_guard&lt;mutex&gt; lg1(m1,adopt_lock)</code>来实现自动解锁。后者的语法里有一个<code>adopt_lock</code>，效果是告诉<code>lock_guard</code>不用再上锁了，直接管理解锁就行<br>
+除此之外又讲了一个叫<code>condition_variable</code>的东西。创建一个<code>condition_variable</code>这么写：<code>condition_variable cv</code>。它的作用是卡住某个线程，只有在满足一些条件时该进程才会开始执行。比如：</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;condition_variable&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;thread&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;mutex&gt;</span></span></span><br><span class="line"><span class="type">int</span> count=<span class="number">0</span>;</span><br><span class="line">std::condition_variable cv;</span><br><span class="line">std::mutex mu;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">addCount</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="function">std::lock_guard&lt;std::mutex&gt; <span class="title">lg</span><span class="params">(mu)</span></span>;</span><br><span class="line">	count++;</span><br><span class="line">	<span class="keyword">if</span>(count==<span class="number">2</span>)&#123;</span><br><span class="line">		cv.<span class="built_in">notify_all</span>();</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">printCount</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="function">std::unique_lock&lt;std::mutex&gt; <span class="title">ul</span><span class="params">(mu)</span></span>; </span><br><span class="line">	cv.<span class="built_in">wait</span>(ul,[]&#123;<span class="keyword">return</span> count==<span class="number">2</span>&#125;);</span><br><span class="line">	std::cout&lt;&lt;<span class="string">&quot;the number of count is:&quot;</span>&lt;&lt;count&lt;&lt;std::endl;</span><br><span class="line">	<span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="function">std::thread <span class="title">t1</span><span class="params">(addCount)</span></span>;</span><br><span class="line">	<span class="function">std::thread <span class="title">t2</span><span class="params">(printCount)</span></span>;</span><br><span class="line">	<span class="function">std::thread <span class="title">t3</span><span class="params">(addCount)</span></span>;</span><br><span class="line"></span><br><span class="line">	t<span class="number">1.</span><span class="built_in">join</span>();</span><br><span class="line">	t<span class="number">2.</span><span class="built_in">join</span>();</span><br><span class="line">	t<span class="number">3.</span><span class="built_in">join</span>();</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在上述这个例子里，理论上，如果无视<code>condition_variable</code>的话，应该是什么值都有可能输出来（大概率是1）<br>
+但实际上，在有<code>condition_variable</code>的条件下，只会输出2<br>
+原因在于，<code>condition_variable</code>有这样一个方法<code>wait</code>，它的使用是<code>cv.wait(lock,function)</code>，一个是某个锁的变量（要求是<code>unique_lock</code>），另一个则是需要输出布尔的函数（也可以传lambda表达式）。它的作用是，判定当前条件下<code>function</code>的输出是不是<code>true</code>。如果是<code>true</code>就正常执行线程；如果是<code>false</code>，就会挂起当前线程并且释放掉传入的那个锁。但是这个线程已经被挂起了，所以一般情况下，即使条件满足了，<code>function</code>能输出<code>true</code>了，这个线程也不会执行（因为这个线程没有执行，它也不知道现在的条件是否满足）<br>
+所以我们需要另一个方法：<code>notify_one</code>和<code>notify_all</code>，它们的效果就是唤起一个或者全部的已挂起的线程，让它们重新跑起来。但是如果这个线程里的<code>wait</code>条件还是不满足，那么该线程会再次被挂起，直到下一次被唤醒再做判断</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://afluren.github.io">afluren</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://afluren.github.io/2025/02/27/C++11%E9%AB%98%E7%BA%A7%E7%89%B9%E6%80%A7%E5%AD%A6%E4%B9%A0/">https://afluren.github.io/2025/02/27/C++11%E9%AB%98%E7%BA%A7%E7%89%B9%E6%80%A7%E5%AD%A6%E4%B9%A0/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://afluren.github.io" target="_blank">弧光</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/C/">C++</a><a class="post-meta__tags" href="/tags/C-11/">C++11</a><a class="post-meta__tags" href="/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">学习笔记</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">afluren</div><div class="author-info-description">afluren的博客</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">4</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">8</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/afluren" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="https://x.com/junweiqian19" target="_blank" title="Twitter"><i class="fab fa-twitter"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">1.</span> <span class="toc-text">References and Move Semantics</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#LValue%E3%80%81RValue"><span class="toc-number">1.0.0.1.</span> <span class="toc-text">LValue、RValue</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Move"><span class="toc-number">1.0.0.2.</span> <span class="toc-text">Move</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">2.</span> <span class="toc-text">C++ Templates</span></a></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">3.</span> <span class="toc-text">Misc</span></a></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">4.</span> <span class="toc-text">C++ Standard Library (STL) Containers</span></a></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">5.</span> <span class="toc-text">C++ Standard Library (STL) Memory</span></a></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">6.</span> <span class="toc-text">C++ Standard Library (STL) Synch Primitives</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/02/27/C++11%E9%AB%98%E7%BA%A7%E7%89%B9%E6%80%A7%E5%AD%A6%E4%B9%A0/" title="C++11高级特性学习">C++11高级特性学习</a><time datetime="2025-02-27T15:40:18.000Z" title="发表于 2025-02-27 23:40:18">2025-02-27</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/02/10/Javascript%E5%BC%82%E6%AD%A5/" title="Javascript异步">Javascript异步</a><time datetime="2025-02-10T08:20:23.000Z" title="发表于 2025-02-10 16:20:23">2025-02-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/10/29/Dijkstra%E5%AE%9E%E7%8E%B0/" title="Dijkstra实现">Dijkstra实现</a><time datetime="2024-10-29T05:52:52.000Z" title="发表于 2024-10-29 13:52:52">2024-10-29</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/06/23/%E7%AC%AC%E5%85%AB%E7%AB%A0%20%E9%9D%99%E7%94%B5%E5%9C%BA/" title="第八章 静电场">第八章 静电场</a><time datetime="2024-06-23T13:18:16.000Z" title="发表于 2024-06-23 21:18:16">2024-06-23</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url(https://cdn.jsdelivr.net/gh/afluren/myPictureBed/Makise.png);"><div id="footer-wrap"><div class="copyright">&copy;2019 - 2025 By afluren</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/qian.js"></script><div class="js-pjax"><script>(async () => {
+  const showKatex = () => {
+    document.querySelectorAll('#article-container .katex').forEach(el => el.classList.add('katex-show'))
+  }
+
+  if (!window.katex_js_css) {
+    window.katex_js_css = true
+    await btf.getCSS('https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css')
+    if (true) {
+      await btf.getScript('https://cdn.jsdelivr.net/npm/katex/dist/contrib/copy-tex.min.js')
+    }
+  }
+
+  showKatex()
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
